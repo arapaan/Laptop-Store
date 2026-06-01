@@ -35,9 +35,7 @@ class ProductController extends Controller
     public function store(ProductRequest $request)
     {
         try {
-            if (!auth()->user()) {
-                throw new Exception('Unauthorized', 401);
-            }
+            $this->authorize('create', Product::class);
 
             $imagePath = null;
 
@@ -85,7 +83,7 @@ class ProductController extends Controller
     public function update(ProductRequest $request, Product $product)
     {
         try {
-            // dd($product);
+            $this->authorize('create', $product);
 
             $imagePath = null;
 
@@ -118,6 +116,7 @@ class ProductController extends Controller
     public function destroy(Product $product)
     {
         try {
+            $this->authorize('delete', $product);
             $deleted = $product->delete();
 
             if(!$deleted) {

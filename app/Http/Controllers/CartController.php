@@ -34,6 +34,8 @@ class CartController extends Controller
     public function store(CartRequest $request)
     {
         try {
+            $this->authorize('create', Cart::class);
+
             $user = auth()->user()->id;
 
             $cart = Cart::create([
@@ -78,9 +80,7 @@ class CartController extends Controller
     public function update(CartRequest $request, Cart $cart)
     {
         try {
-            if (!auth()->user()) {
-                throw new Exception('Unauthorized', 401);
-            }
+            $this->authorize('create', $cart);
 
             $cart->products()->updateExistingPivot($request->product_id, [
                 'qty'   =>  $request->qty
@@ -104,6 +104,8 @@ class CartController extends Controller
     public function destroy(Cart $cart)
     {
         try {
+            $this->authorize('delete', $cart);
+
             $cart->products()->detach();
             $cart->delete();
 

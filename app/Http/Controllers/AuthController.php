@@ -9,7 +9,9 @@ use App\Http\Resources\UserResource;
 use App\Models\User;
 use Exception;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Cookie;
 use Illuminate\Support\Facades\Hash;
+use Tymon\JWTAuth\Facades\JWTAuth;
 
 class AuthController extends Controller
 {
@@ -70,6 +72,7 @@ class AuthController extends Controller
     {
         try {
             auth()->logout();
+            JWTAuth::invalidate(JWTAuth::getToken());
             return $this->successResponse(null, 'successfully logged out', 200);
         } catch (Exception $e) {
             return $this->errorResponse($e->getMessage(), $e->getCode());
