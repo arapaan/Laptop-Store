@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\ApiResponse;
+use App\Http\Requests\CartRequest;
 use App\Http\Resources\CartResource;
 use App\Models\Cart;
 use Exception;
@@ -30,7 +31,7 @@ class CartController extends Controller
     /**
      * Store a newly created resource in storage.
      */
-    public function store(Request $request)
+    public function store(CartRequest $request)
     {
         try {
             $user = auth()->user()->id;
@@ -74,10 +75,12 @@ class CartController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, Cart $cart)
+    public function update(CartRequest $request, Cart $cart)
     {
         try {
-            $user = auth()->user()->id;
+            if (!auth()->user()) {
+                throw new Exception('Unauthorized', 401);
+            }
 
             $cart->products()->updateExistingPivot($request->product_id, [
                 'qty'   =>  $request->qty
@@ -98,8 +101,19 @@ class CartController extends Controller
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(string $id)
+    public function destroy(Cart $cart)
     {
-        //
+        try {
+            $cart->products()->detach();
+            $cart->delete();
+
+            if(!$cart) {
+                throw new Exception('failed to delete Cart', 422);
+            }
+
+            return $this->successResponse(null, 'successfully deleted Cart', 200);
+        } catch (Exception $e) {
+            return $this->errorResponse($e->getMessage(), $e->getCode());
+        }
     }
 }
