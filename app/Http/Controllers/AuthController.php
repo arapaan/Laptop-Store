@@ -4,16 +4,34 @@ namespace App\Http\Controllers;
 
 use App\ApiResponse;
 use App\Http\Requests\LoginRequest;
+use App\Http\Requests\RegisterRequest;
+use App\Http\Resources\UserResource;
+use App\Models\User;
 use Exception;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Hash;
 
 class AuthController extends Controller
 {
     use ApiResponse;
 
-    public function register()
+    public function register(RegisterRequest $request)
     {
-        //
+        try {
+            $user = User::create([
+                'name' => $request->name,
+                'email' => $request->email,
+                'password' => Hash::make($request->password),
+            ]);
+
+            if (!$user) {
+                throw new Exception('failed to create user', 422);
+            }
+
+            return $this->successResponse(UserResource::make($user), 'successfully created user', 200);
+        } catch (Exception $e) {
+            return $this->errorResponse($e->getMessage(), $e->getCode() ?: 400);
+        }
     }
 
     public function login(LoginRequest $request)
@@ -52,7 +70,7 @@ class AuthController extends Controller
     {
         try {
             auth()->logout();
-            return $this->successResponse(null, 'SuccessFully Logged out', 200);
+            return $this->successResponse(null, 'successfully logged out', 200);
         } catch (Exception $e) {
             return $this->errorResponse($e->getMessage(), $e->getCode());
         }
@@ -61,7 +79,12 @@ class AuthController extends Controller
     public function me()
     {
         try {
-            return $this->successResponse(auth()->user(), 'SuccessFully Logged out', 200);
+            $auth = auth()->user();
+
+            if (!$auth) {
+                throw new Exception('Unauthorized', 401);
+            }
+            return $this->successResponse($auth, 'SuccessFully get user', 200);
         } catch (Exception $e) {
             return $this->errorResponse($e->getMessage(), $e->getCode());
         }
