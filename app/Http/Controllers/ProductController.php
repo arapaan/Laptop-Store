@@ -35,6 +35,9 @@ class ProductController extends Controller
     public function store(ProductRequest $request)
     {
         try {
+            if (!auth()->user()) {
+                throw new Exception('Unauthorized', 401);
+            }
 
             $imagePath = null;
 
