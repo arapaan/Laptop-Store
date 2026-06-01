@@ -47,7 +47,10 @@ class AuthController extends Controller
                 throw new Exception('Unauthorized', 401);
             }
 
-            return $this->successResponse(null, 'successfully logged in', 200)->cookie(
+            // Cookie::queue('jwt_token', $token, 60);
+
+            return $this->successResponse(null, 'successfully logged in', 200)
+            ->cookie(
                 'jwt_token',        // name cookie
                 $token,             // value token
                 60,                 // expires in minutes
@@ -57,7 +60,8 @@ class AuthController extends Controller
                 true,               // httpOnly
                 false,              // raw
                 'strict'            // sameSite
-            );
+            )
+            ;
         } catch (Exception $e) {
             return $this->errorResponse($e->getMessage(), $e->getCode());
         }
@@ -73,7 +77,7 @@ class AuthController extends Controller
         try {
             auth()->logout();
             JWTAuth::invalidate(JWTAuth::getToken());
-            return $this->successResponse(null, 'successfully logged out', 200);
+            return $this->successResponse(null, 'successfully logged out', 200)->withoutCookie('jwt_token');
         } catch (Exception $e) {
             return $this->errorResponse($e->getMessage(), $e->getCode());
         }
