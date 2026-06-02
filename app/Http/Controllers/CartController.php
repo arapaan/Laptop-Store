@@ -9,6 +9,9 @@ use App\Models\Cart;
 use App\Models\Product;
 use Exception;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
+use Stripe\Checkout\Session;
+use Stripe\Stripe;
 
 class CartController extends Controller
 {
@@ -38,24 +41,25 @@ class CartController extends Controller
             $this->authorize('create', Cart::class);
 
             $user = auth()->user()->id;
+            $cart = Cart::where('user_id', $user)->first();
 
-            $cart = Cart::create([
-                'user_id'   =>  $user
-            ]);
+            if(!$cart) {
+                $cart = Cart::create(['user_id'   =>  $user]);
+            }           
 
-            if ($request->qty > 1) {
-                $product  = Product::find($request->product_id);
+            // if ($request->qty > 1) {
+            //     $product  = Product::find($request->product_id);
 
-                if ($product->stock < $request->qty) {
-                    throw new Exception('This ' . $product->name . ' below the required amount, only ' . $product->stock . ' remains.', 422);
-                }
+            //     if ($product->stock < $request->qty) {
+            //         throw new Exception('This ' . $product->name . ' below the required amount, only ' . $product->stock . ' remains.', 422);
+            //     }
 
-                $product->update([
-                    'stock' =>  $product->stock - $request->qty
-                ]);
-            }
+            //     $product->update([
+            //         'stock' =>  $product->stock - $request->qty
+            //     ]);
+            // }
 
-            $attach = $cart->products()->attach($request->product_id, [
+            $cart->products()->attach($request->product_id, [
                 'qty'   =>  $request->qty
             ]);            
 
@@ -131,6 +135,46 @@ class CartController extends Controller
             }
 
             return $this->successResponse(null, 'successfully deleted Cart', 200);
+        } catch (Exception $e) {
+            return $this->errorResponse($e->getMessage(), $e->getCode());
+        }
+    }
+
+    public function checkout(Cart $cart)
+    {
+        try {
+            Stripe::setApiKey(config('stripe.sk'));
+            
+            $datas = $cart->products;
+
+            // dd($datas);            
+            $lineItems = [];
+            foreach ($datas as $data) {
+                $lineItems[] = [
+                'price_data' => [
+                    'currency' => 'idr',
+                    'product_data' => [
+                        'name' => $data['name'],
+                    ],
+                    'unit_amount' => $data['price'],
+                ],
+                'quantity' => $data['pivot']->qty,
+            ];
+            }
+            
+            $session = Session::create([
+                'payment_method_types' => ['card'],
+                'line_items' => $lineItems,
+                'mode' => 'payment',
+                // 'success_url' => route('payment.success') . '?session_id={CHECKOUT_SESSION_ID}',
+                // 'cancel_url' => route('payment.cancel'),
+                'success_url' => route('success'),
+                'cancel_url' => route('index'),
+            ]);
+
+            return redirect()->away($session->url);
+
+            return $this->successResponse(CartResource::make($query), 'successfully deleted Cart', 200);
         } catch (Exception $e) {
             return $this->errorResponse($e->getMessage(), $e->getCode());
         }
