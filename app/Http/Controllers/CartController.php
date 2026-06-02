@@ -6,6 +6,7 @@ use App\ApiResponse;
 use App\Http\Requests\CartRequest;
 use App\Http\Resources\CartResource;
 use App\Models\Cart;
+use App\Models\Product;
 use Exception;
 use Illuminate\Http\Request;
 
@@ -42,9 +43,21 @@ class CartController extends Controller
                 'user_id'   =>  $user
             ]);
 
-            $cart->products()->attach($request->product_id, [
+            if ($request->qty > 1) {
+                $product  = Product::find($request->product_id);
+
+                if ($product->stock < $request->qty) {
+                    throw new Exception('This ' . $product->name . ' below the required amount, only ' . $product->stock . ' remains.', 422);
+                }
+
+                $product->update([
+                    'stock' =>  $product->stock - $request->qty
+                ]);
+            }
+
+            $attach = $cart->products()->attach($request->product_id, [
                 'qty'   =>  $request->qty
-            ]);
+            ]);            
 
             if(!$cart) {
                 throw new Exception('failed to add Cart', 422);
