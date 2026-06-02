@@ -6,7 +6,6 @@ use App\ApiResponse;
 use App\Http\Requests\CartRequest;
 use App\Http\Resources\CartResource;
 use App\Models\Cart;
-use App\Models\cartItem;
 use App\Models\Product;
 use Exception;
 use Illuminate\Http\Request;
