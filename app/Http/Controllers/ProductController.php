@@ -66,7 +66,11 @@ class ProductController extends Controller
      */
     public function show(Product $product)
     {
-        //
+        try {
+            return $this->successResponse(ProductResource::make($product), 'successfully displays product data', 200);
+        } catch (Exception $e) {
+            return $this->errorResponse($e->getMessage(), $e->getCode());
+        }
     }
 
     /**

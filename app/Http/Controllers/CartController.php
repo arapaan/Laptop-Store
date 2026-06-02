@@ -61,9 +61,13 @@ class CartController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show(string $id)
+    public function show(Cart $cart)
     {
-        //
+        try {
+            return $this->successResponse(CartResource::make($cart), 'successfully displays cart data', 200);
+        } catch (Exception $e) {
+            return $this->errorResponse($e->getMessage(), $e->getCode());
+        }
     }
 
     /**
