@@ -89,8 +89,6 @@ class CartController extends Controller
     public function show(Cart $cart)
     {
         try {
-            $cart->load('products');
-            // dd($cart);
             return $this->successResponse(CartResource::make($cart), 'successfully displays cart data', 200);
         } catch (Exception $e) {
             return $this->errorResponse($e->getMessage(), $e->getCode());
