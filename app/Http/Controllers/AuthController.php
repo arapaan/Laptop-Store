@@ -69,7 +69,18 @@ class AuthController extends Controller
 
     public function refresh()
     {
-        return $this->successResponse(auth()->refresh(), 'Token refreshed', 200);    
+        $token = auth()->refresh();
+        return $this->successResponse($token, 'Token refreshed', 200)->cookie(
+                'jwt_token',        // name cookie
+                $token,             // value token
+                60,                 // expires in minutes
+                '/',                // path
+                null,               // domain
+                true,               // secure (HTTPS only — set false in local)
+                true,               // httpOnly
+                false,              // raw
+                'strict'            // sameSite
+            );    
     }
 
     public function logout()
