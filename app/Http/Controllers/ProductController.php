@@ -18,7 +18,12 @@ class ProductController extends Controller
      */
     public function index()
     {
-        //
+        try {
+            $products = Product::get();
+            return $this->successResponse(ProductResource::collection($products), 'successfully get product data', 200);
+        } catch (Exception $e) {
+            return $this->errorResponse($e->getMessage(), $e->getCode());
+        }
     }
 
     /**
