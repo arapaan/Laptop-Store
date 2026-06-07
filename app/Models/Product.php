@@ -34,4 +34,9 @@ class Product extends Model
 
         return config('app.url') . Storage::url($this->attributes['image_url']);
     }
+
+    public function getPriceIdrAttribute($value)
+    {
+        return 'Rp ' . number_format($this->price, 0, ',', '.');
+    }
 }
