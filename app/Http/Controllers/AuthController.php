@@ -47,9 +47,12 @@ class AuthController extends Controller
                 throw new Exception('Unauthorized', 401);
             }
 
-            // Cookie::queue('jwt_token', $token, 60);
+            $user = User::where('email', $request->email)->first();
 
-            return $this->successResponse(null, 'successfully logged in', 200)
+            return $this->successResponse([
+                    'user' => UserResource::make($user),
+                    'jwt_token'     => $token,
+                ], 'successfully logged in', 200)
             ->cookie(
                 'jwt_token',        // name cookie
                 $token,             // value token
@@ -60,8 +63,7 @@ class AuthController extends Controller
                 true,               // httpOnly
                 false,              // raw
                 'strict'            // sameSite
-            )
-            ;
+            );
         } catch (Exception $e) {
             return $this->errorResponse($e->getMessage(), $e->getCode());
         }
