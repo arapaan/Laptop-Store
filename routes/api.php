@@ -19,7 +19,7 @@ Route::prefix('auth')->group(function () {
 });
 
 Route::middleware(['jwt'])->group(function () {
-    Route::resource('product', ProductController::class);
     Route::resource('cart', CartController::class);
     Route::post('checkout/{cart}', [CartController::class, 'checkout']);
-});
+    });
+    Route::resource('product', ProductController::class);
