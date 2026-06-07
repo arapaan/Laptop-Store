@@ -19,8 +19,10 @@ class ProductResource extends JsonResource
             'name'          =>  $this->name,
             'description'   =>  $this->description,
             'price'         =>  $this->price,
+            'price_idr'     =>  $this->price_idr,
             'stock'         =>  $this->stock,
             'image_url'     =>  $this->image_url ? asset('storage/' . $this->image_url) : null,
+            'carts'         =>  CartResource::collection($this->whenLoaded('carts')),
             'created_at'    =>  $this->created_at,
             'updated_at'    =>  $this->updated_at,
         ];
