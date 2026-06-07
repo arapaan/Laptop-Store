@@ -6,6 +6,7 @@ use App\ApiResponse;
 use App\Http\Requests\CartRequest;
 use App\Http\Resources\CartResource;
 use App\Models\Cart;
+use App\Models\cartItem;
 use App\Models\Product;
 use Exception;
 use Illuminate\Http\Request;
@@ -88,6 +89,8 @@ class CartController extends Controller
     public function show(Cart $cart)
     {
         try {
+            $cart->load('products');
+            // dd($cart);
             return $this->successResponse(CartResource::make($cart), 'successfully displays cart data', 200);
         } catch (Exception $e) {
             return $this->errorResponse($e->getMessage(), $e->getCode());
