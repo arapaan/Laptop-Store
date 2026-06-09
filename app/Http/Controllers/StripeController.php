@@ -17,20 +17,47 @@ class StripeController extends Controller
     {
         Stripe::setApiKey(config('stripe.sk'));
 
-        $session = Session::create([
-            'line_items' => [
-                [
-                    'price_data' => [
-                        'currency' => 'usd',
-                        'product_data' => [
-                            'name' => 'Send me Moneyy!!!',
-                        ],
-                        'unit_amount' => 1000,
-                    ],
-                    'quantity' => 1,
-                ],
+        $datas = [
+            [
+                'currency'  => 'idr',
+                'name'  => 'Send me Moneyy!!!',
+                'unit_amount'  => 100000000,
+                'quantity'  => 1,
             ],
+            [
+                'currency'  => 'idr',
+                'name'  => 'ashdbhasdb!!!',
+                'unit_amount'  => 500000000,
+                'quantity'  => 5,
+            ],
+            [
+                'currency'  => 'idr',
+                'name'  => 'asjkdbhasbdnbasd!!!',
+                'unit_amount'  => 500000000,
+                'quantity'  => 1,
+            ],
+        ];
+
+        $lineItems = [];
+        foreach ($datas as $data) {
+            $lineItems[] = [
+                'price_data' => [
+                    'currency' => 'idr',
+                    'product_data' => [
+                        'name' => $data['name'],
+                    ],
+                    'unit_amount' => $data['unit_amount'],
+                ],
+                'quantity' => $data['quantity'],
+            ];
+        }
+
+        $session = Session::create([
+            'payment_method_types' => ['card'],
+            'line_items' => $lineItems,
             'mode' => 'payment',
+            // 'success_url' => route('payment.success') . '?session_id={CHECKOUT_SESSION_ID}',
+            // 'cancel_url' => route('payment.cancel'),
             'success_url' => route('success'),
             'cancel_url' => route('index'),
         ]);

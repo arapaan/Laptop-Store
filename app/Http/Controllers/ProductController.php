@@ -18,7 +18,13 @@ class ProductController extends Controller
      */
     public function index()
     {
-        //
+        try {
+            $products = Product::get();
+            $products->load('carts');
+            return $this->successResponse(ProductResource::collection($products), 'successfully get product data', 200);
+        } catch (Exception $e) {
+            return $this->errorResponse($e->getMessage(), $e->getCode());
+        }
     }
 
     /**
@@ -35,6 +41,8 @@ class ProductController extends Controller
     public function store(ProductRequest $request)
     {
         try {
+            Log::info('Product: ');
+            Log::info($request);
             $this->authorize('create', Product::class);
 
             $imagePath = null;
@@ -66,7 +74,11 @@ class ProductController extends Controller
      */
     public function show(Product $product)
     {
-        //
+        try {
+            return $this->successResponse(ProductResource::make($product), 'successfully displays product data', 200);
+        } catch (Exception $e) {
+            return $this->errorResponse($e->getMessage(), $e->getCode());
+        }
     }
 
     /**
@@ -87,7 +99,7 @@ class ProductController extends Controller
 
             $imagePath = null;
 
-            if($request->image_url) {
+            if($request->hasFile('image_url')) {
                 $imagePath = $request->file('image_url')->store('laptops', 'public');
             }
 
