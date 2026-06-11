@@ -40,14 +40,21 @@ class ProductController extends Controller
      */
     public function store(ProductRequest $request)
     {
+        Log::info('image_url from frontend: ');
+        Log::info($request->image_url);
         try {
+            $checkProduct = Product::where('name', $request->name)->first();
+            if($checkProduct) {
+                throw new Exception('Product name already exists', 422);
+            }
+            
             Log::info('Product: ');
             Log::info($request);
             $this->authorize('create', Product::class);
 
             $imagePath = null;
 
-            if($request->image_url) {
+            if($request->hasFile('image_url')) {
                 $imagePath = $request->file('image_url')->store('laptops', 'public');
             }
 
@@ -97,7 +104,9 @@ class ProductController extends Controller
         try {
             $this->authorize('create', $product);
 
-            $imagePath = null;
+            $checkProduct = Product::where('name', $request->name)->first();            
+
+            $imagePath = $checkProduct->image_url;
 
             if($request->hasFile('image_url')) {
                 $imagePath = $request->file('image_url')->store('laptops', 'public');

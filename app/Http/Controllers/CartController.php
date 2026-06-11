@@ -45,7 +45,7 @@ class CartController extends Controller
             $cart = Cart::where('user_id', $user)->first();
 
             if(!$cart) {
-                $cart = Cart::Craete(['user_id'   =>  $user]);
+                $cart = Cart::Create(['user_id'   =>  $user]);
             }
             // Log::info('lewat pengecekan cart');
             
