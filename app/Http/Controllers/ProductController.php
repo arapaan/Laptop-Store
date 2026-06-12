@@ -102,13 +102,14 @@ class ProductController extends Controller
     public function update(ProductRequest $request, Product $product)
     {
         try {
+            // dd($product->image_url);
             $this->authorize('create', $product);
 
             $checkProduct = Product::where('name', $request->name)->first();            
 
             $imagePath = $checkProduct->image_url;
 
-            if($request->hasFile('image_url')) {
+            if($request->hasFile('image_url') || !$request->image_url) {
                 $imagePath = $request->file('image_url')->store('laptops', 'public');
             }
 
