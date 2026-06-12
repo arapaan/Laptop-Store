@@ -11,6 +11,7 @@ use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cookie;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Log;
 use Tymon\JWTAuth\Facades\JWTAuth;
 
 class AuthController extends Controller
@@ -46,12 +47,15 @@ class AuthController extends Controller
             if(!$token) {
                 throw new Exception('Unauthorized', 401);
             }
+            $expiredAt = now()->addMinutes(60);
+            Log::info('Expired at: ' . $expiredAt->toDateTimeString());
 
             $user = User::where('email', $request->email)->first();
 
             return $this->successResponse([
                     'user' => UserResource::make($user),
                     'jwt_token'     => $token,
+                    'expires_at'    => $expiredAt->toDateTimeString(),
                 ], 'successfully logged in', 200)
             ->cookie(
                 'jwt_token',        // name cookie
@@ -100,6 +104,7 @@ class AuthController extends Controller
     {
         try {
             $auth = auth()->user();
+            $role = $auth->getRoleNames();
 
             if (!$auth) {
                 throw new Exception('Unauthorized', 401);
