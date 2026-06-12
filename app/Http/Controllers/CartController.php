@@ -22,7 +22,14 @@ class CartController extends Controller
      */
     public function index()
     {
-        //
+        try {
+            $id = auth()->user()->id;
+
+            $cart = Cart::where('user_id', $id)->first();
+            return $this->successResponse(CartResource::make($cart), 'successfully displays Cart data', 200);
+        } catch (Exception $e) {
+            return $this->errorResponse($e->getMessage(), $e->getCode());
+        }
     }
 
     /**
