@@ -163,17 +163,17 @@ class CartController extends Controller
             Stripe::setApiKey(config('stripe.sk'));
             
             $datas = $cart->products;
-
-            // dd($datas);            
+     
             $lineItems = [];
             foreach ($datas as $data) {
+                $price = $data['price'] * 100;                
                 $lineItems[] = [
                 'price_data' => [
                     'currency' => 'idr',
                     'product_data' => [
                         'name' => $data['name'],
                     ],
-                    'unit_amount' => $data['price'],
+                    'unit_amount' => $price,
                 ],
                 'quantity' => $data['pivot']->qty,
             ];
